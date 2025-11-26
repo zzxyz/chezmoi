@@ -1,0 +1,142 @@
+export LC_ALL="en_US.UTF-8"
+export EDITOR='vim'
+export VISUAL='vim'
+HISTFILE=~/.histfile
+HISTSIZE=50000
+SAVEHIST=50000
+setopt INC_APPEND_HISTORY
+setopt interactivecomments
+setopt PUSHD_MINUS
+setopt AUTO_PUSHD
+setopt pushd_ignore_dups
+setopt extendedglob
+DIRSTACKSIZE=9
+DIRSTACKFILE=~/.zdirs
+fpath=(/usr/share/zsh-completions/src $fpath)
+# The following lines were added by compinstall
+
+zstyle ':completion:*' matcher-list 'm:{[:lower:]}={[:upper:]}'
+zstyle :compinstall filename '/home/tyler/.zshrc'
+
+autoload -Uz compinit
+compinit
+kitty + complete setup zsh | source /dev/stdin
+# End of lines added by compinstall
+# create a zkbd compatible hash;
+# to add other keys to this hash, see: man 5 terminfo
+typeset -g -A key
+
+key[Home]="${terminfo[khome]}"
+key[End]="${terminfo[kend]}"
+key[Insert]="${terminfo[kich1]}"
+key[Backspace]="${terminfo[kbs]}"
+key[Delete]="${terminfo[kdch1]}"
+key[Up]="${terminfo[kcuu1]}"
+key[Down]="${terminfo[kcud1]}"
+key[Left]="${terminfo[kcub1]}"
+key[Right]="${terminfo[kcuf1]}"
+key[PageUp]="${terminfo[kpp]}"
+key[PageDown]="${terminfo[knp]}"
+key[Shift-Tab]="${terminfo[kcbt]}"
+
+[[ -n "${key[Home]}"      ]] && bindkey -- "${key[Home]}"       beginning-of-line
+[[ -n "${key[End]}"       ]] && bindkey -- "${key[End]}"        end-of-line
+[[ -n "${key[Delete]}"       ]] && bindkey -- "${key[Delete]}"        delete-char
+
+
+if (( ${+terminfo[smkx]} && ${+terminfo[rmkx]} )); then
+	autoload -Uz add-zle-hook-widget
+	function zle_application_mode_start { echoti smkx }
+	function zle_application_mode_stop { echoti rmkx }
+	add-zle-hook-widget -Uz zle-line-init zle_application_mode_start
+	add-zle-hook-widget -Uz zle-line-finish zle_application_mode_stop
+fi
+zmodload zsh/zle
+autoload -U up-line-or-beginning-search
+autoload -U down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+#bindkey 'OA' up-line-or-beginning-search
+bindkey "${key[Up]}" up-line-or-beginning-search
+bindkey "${key[Down]}" down-line-or-beginning-search
+bindkey "^[[1;5C" forward-word
+bindkey "^[[1;5D" backward-word
+autoload -U colors && colors
+PROMPT="%m:%~%(!.☺.%(?.£.%{$fg[red]%}£%{$fg[default]%})) "
+path+=("$HOME/.local/bin")
+path+=('/home/tyler/bin')
+path+=('/usr/lib64/garglk')
+export PATH
+export NO_AT_BRIDGE=1
+
+function settitle() {
+	echo -ne "\033]2;"$1"\007"
+}
+
+function chpwd() {
+	settitle "$HOST@$(pwd)"
+}
+
+# enable color support of ls and also add handy aliases
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+
+# colored GCC warnings and errors
+#export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+
+man() {
+  env \
+    LESS_TERMCAP_mb=$(printf "\e[1;31m") \
+    LESS_TERMCAP_md=$(printf "\e[1;31m") \
+    LESS_TERMCAP_me=$(printf "\e[0m") \
+    LESS_TERMCAP_se=$(printf "\e[0m") \
+    LESS_TERMCAP_so=$(printf "\e[1;44;33m") \
+    LESS_TERMCAP_ue=$(printf "\e[0m") \
+    LESS_TERMCAP_us=$(printf "\e[1;32m") \
+    man "$@"
+}
+
+# some more ls aliases
+alias LS='ls --color=auto'
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+alias lld='ls -ldtr -- */'
+alias powershell='pwsh'
+alias icat='kitty +kitten icat'
+# Add an "alert" alias for long running commands.  Use like so:
+#   sleep 10; alert
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+alias findre='find . -regextype egrep -regex'
+alias findrei='find . -regextype egrep -iregex'
+
+# hash -d \
+	# igc=/sg/thor/igc \
+	# igchome=/sg/thor/home/export/igc \
+	# nginx=/home/tyler/awsTrash/trlserver/nginx
+	# sdal=/home/tyler/src/sdal/Dev/Source
+	# trlserver=/home/tyler/src/sdal/trlserver
+
+
+# You may want to put all your additions into a separate file like
+# ~/.bash_aliases, instead of adding them here directly.
+# See /usr/share/doc/bash-doc/examples in the bash-doc package.
+
+source ~/.zsharch
+
+ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
+. /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+ZSH_HIGHLIGHT_STYLES[path]=none
+
+case "$TERM" in
+    *kitty*) icat ~/beezel\ puff.jpg;;
+    *st-256*) tmux -2;;
+    *) fortune -a;;
+esac
+chpwd
+# alias crawl="cd ~/bin && ~/bin/crawl && cd -"

@@ -1,0 +1,130 @@
+" ============================================================================
+" VIM-PLUG SETUP
+" ============================================================================
+" Install vim-plug if not already installed
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+" Plugin declarations
+call plug#begin('~/.vim/plugged')
+
+Plug 'tpope/vim-fugitive'              " Git integration
+Plug 'ctrlpvim/ctrlp.vim'              " Fuzzy file finder
+Plug 'tpope/vim-commentary'            " Easy commenting with gcc
+Plug 'sonph/onehalf', { 'rtp': 'vim' } " One Half Dark color scheme
+Plug 'morhetz/gruvbox'                 " Gruvbox color scheme
+Plug 'arcticicestudio/nord-vim'        " Nord color scheme
+
+call plug#end()
+
+" ============================================================================
+" GENERAL SETTINGS
+" ============================================================================
+" Enable syntax highlighting
+syntax on
+filetype plugin indent on
+
+" Search settings
+set incsearch          " Incremental search
+set hlsearch           " Highlight search results
+
+" Tab settings
+set tabstop=4
+set softtabstop=0
+set expandtab
+set shiftwidth=4
+set smarttab
+
+" Undo settings
+set undofile
+set undodir=~/.vim/local/undo
+silent !mkdir -p ~/.vim/local/undo > /dev/null 2>&1
+
+" Other settings
+set hidden             " Allow hidden buffers
+set formatoptions-=cro " Disable auto-commenting
+set viminfo='100,<1000,s100  " Increase cross-process buffer
+set tags=./tags;       " Look for tags file up the directory tree
+set grepprg=git\ grep  " Use git grep for :grep
+
+" ============================================================================
+" COLOR SCHEME
+" ============================================================================
+" Enable 24-bit true color support
+if has('termguicolors')
+  set termguicolors
+endif
+
+set background=dark
+
+" To switch color schemes, comment/uncomment the lines below:
+colorscheme gruvbox                    " Active: Gruvbox (warm, retro)
+" colorscheme nord                     " Arctic, cool blues
+" colorscheme onehalfdark              " Matches One Half Dark terminal
+
+" ============================================================================
+" KEY MAPPINGS
+" ============================================================================
+" Buffer navigation
+nnoremap <silent> <F1> <ESC>:bprev<CR>
+nnoremap <silent> <F3> <ESC>:bnext<CR>
+
+" Tag navigation
+nnoremap <silent> <F4> <ESC>:tprev<CR>
+nnoremap <silent> <F5> <ESC>:tnext<CR>
+
+" Quickfix navigation
+map <silent> <F6> <ESC>:cprevious<CR>
+map <silent> <F7> <ESC>:cnext<CR>
+
+" Use semicolon as colon (faster command entry)
+nnoremap ; :
+vnoremap ; :
+
+" Handle alternate mintty escape sequence
+let &t_ti.="\e[?7727h"
+let &t_te.="\e[?7727l"
+noremap <Esc>O[ <Esc>
+noremap! <Esc>O[ <C-c>
+
+" ============================================================================
+" CHEZMOI FILETYPE DETECTION
+" ============================================================================
+" Strip chezmoi prefixes for proper syntax highlighting
+augroup chezmoi_filetype
+  autocmd!
+  autocmd BufRead,BufNewFile */chezmoi/dot_*,*/chezmoi/private_*,*/chezmoi/executable_* call s:SetChezmoiFiletype()
+augroup END
+
+function! s:SetChezmoiFiletype()
+  let l:fname = expand('%:t')
+  " Remove chezmoi prefixes
+  let l:fname = substitute(l:fname, '^dot_', '.', '')
+  let l:fname = substitute(l:fname, '^private_dot_', '.', '')
+  let l:fname = substitute(l:fname, '^executable_dot_', '.', '')
+  let l:fname = substitute(l:fname, '^private_', '', '')
+  let l:fname = substitute(l:fname, '^executable_', '', '')
+  let l:fname = substitute(l:fname, '.tmpl$', '', '')
+
+  " Detect filetype based on common dotfile patterns
+  if l:fname =~# '^\.zshrc' || l:fname =~# '^\.zsh' || l:fname =~# '\.zsh$'
+    set filetype=zsh
+  elseif l:fname =~# '^\.bashrc' || l:fname =~# '^\.bash_profile' || l:fname =~# '^\.bash_' || l:fname =~# '\.bash$' || l:fname =~# '\.sh$'
+    set filetype=sh
+  elseif l:fname =~# '^\.vimrc' || l:fname =~# '\.vim$'
+    set filetype=vim
+  elseif l:fname =~# '\.gitconfig$' || l:fname =~# '^\.gitignore' || l:fname =~# '^\.gitattributes'
+    set filetype=gitconfig
+  elseif l:fname =~# '\.tmux' || l:fname =~# '^\.tmux\.conf'
+    set filetype=tmux
+  elseif l:fname =~# '\.ya\?ml$'
+    set filetype=yaml
+  elseif l:fname =~# '\.toml$'
+    set filetype=toml
+  elseif l:fname =~# '\.json$'
+    set filetype=json
+  endif
+endfunction
