@@ -128,7 +128,9 @@ alias findrei='find . -regextype egrep -iregex'
 # ~/.bash_aliases, instead of adding them here directly.
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
 
+{{- if eq .chezmoi.osRelease.id "arch" }}
 source ~/.zsharch
+{{- end }}
 
 ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 {{- if eq .chezmoi.osRelease.id "arch" }}
