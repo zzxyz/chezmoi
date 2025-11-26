@@ -16,7 +16,7 @@ fpath=(/usr/share/zsh-completions/src $fpath)
 # The following lines were added by compinstall
 
 zstyle ':completion:*' matcher-list 'm:{[:lower:]}={[:upper:]}'
-zstyle :compinstall filename '/home/tyler/.zshrc'
+zstyle :compinstall filename "$HOME/.zshrc"
 
 autoload -Uz compinit
 compinit
@@ -64,7 +64,7 @@ bindkey "^[[1;5D" backward-word
 autoload -U colors && colors
 PROMPT="%m:%~%(!.☺.%(?.£.%{$fg[red]%}£%{$fg[default]%})) "
 path+=("$HOME/.local/bin")
-path+=('/home/tyler/bin')
+path+=("$HOME/bin")
 path+=('/usr/lib64/garglk')
 export PATH
 export NO_AT_BRIDGE=1
@@ -118,10 +118,6 @@ alias findrei='find . -regextype egrep -iregex'
 # hash -d \
 	# igc=/sg/thor/igc \
 	# igchome=/sg/thor/home/export/igc \
-	# nginx=/home/tyler/awsTrash/trlserver/nginx
-	# sdal=/home/tyler/src/sdal/Dev/Source
-	# trlserver=/home/tyler/src/sdal/trlserver
-
 
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
