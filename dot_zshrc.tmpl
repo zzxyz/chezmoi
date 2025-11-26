@@ -12,7 +12,12 @@ setopt pushd_ignore_dups
 setopt extendedglob
 DIRSTACKSIZE=9
 DIRSTACKFILE=~/.zdirs
+{{- if eq .chezmoi.osRelease.id "arch" }}
 fpath=(/usr/share/zsh-completions/src $fpath)
+{{- else if eq .chezmoi.osRelease.id "ubuntu" }}
+# Ubuntu: zsh-completions typically in /usr/share/zsh/vendor-completions
+fpath=(/usr/share/zsh/vendor-completions $fpath)
+{{- end }}
 # The following lines were added by compinstall
 
 zstyle ':completion:*' matcher-list 'm:{[:lower:]}={[:upper:]}'
@@ -126,13 +131,18 @@ alias findrei='find . -regextype egrep -iregex'
 source ~/.zsharch
 
 ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
+{{- if eq .chezmoi.osRelease.id "arch" }}
 . /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+{{- else if eq .chezmoi.osRelease.id "ubuntu" }}
+# Ubuntu path for zsh-syntax-highlighting
+[ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ] && . /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+{{- end }}
 ZSH_HIGHLIGHT_STYLES[path]=none
 
 case "$TERM" in
-    *kitty*) icat ~/beezel\ puff.jpg;;
+    *kitty*) [ -f ~/beezel\ puff.jpg ] && icat ~/beezel\ puff.jpg;;
     *st-256*) tmux -2;;
-    *) fortune -a;;
+    *) fortune -a 2>/dev/null || true;;
 esac
 chpwd
 # alias crawl="cd ~/bin && ~/bin/crawl && cd -"
