@@ -1,3 +1,4 @@
+{{- $isHome := eq .chezmoi.hostname "HMSLively" -}}
 export LC_ALL="en_US.UTF-8"
 export EDITOR='vim'
 export VISUAL='vim'
@@ -144,7 +145,11 @@ ZSH_HIGHLIGHT_STYLES[path]=none
 case "$TERM" in
     *kitty*) [ -f ~/beezel\ puff.jpg ] && icat ~/beezel\ puff.jpg;;
     *st-256*) tmux -2;;
+  {{- if $isHome }}
     *) fortune -a 2>/dev/null || true;;
+  {{- else }}
+    *) fortune 2>/dev/null || true;;
+  {{- end }}
 esac
 chpwd
 # alias crawl="cd ~/bin && ~/bin/crawl && cd -"
