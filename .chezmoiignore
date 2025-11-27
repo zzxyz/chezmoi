@@ -1,0 +1,4 @@
+{{- /* Ignore .zsharch on non-Arch systems */ -}}
+{{- if ne .chezmoi.osRelease.id "arch" }}
+.zsharch
+{{- end }}
