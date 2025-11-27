@@ -16,9 +16,10 @@ Chezmoi uses special prefixes to determine how files are processed:
 - `private_` → file mode 0600
 - `executable_` → file mode 0755
 - `symlink_` → creates a symlink
+- `encrypted_` → encrypted with age (requires `~/.config/chezmoi/key.txt`)
 - `.tmpl` suffix → processed as a Go template
 
-Files can combine prefixes: `private_dot_ssh_config` → `~/.ssh/config` with mode 0600
+Files can combine prefixes: `private_dot_ssh/encrypted_private_id_ed25519.age` → `~/.ssh/id_ed25519` with mode 0600, encrypted
 
 ### Common Commands
 
@@ -54,7 +55,40 @@ chezmoi cd                  # Change to source directory
 
 - **Source directory**: `~/.local/share/chezmoi`
 - **Target directory**: `~/.home/aubrey` (user's home directory)
-- **Currently managed**: `.zshrc`
+- **Encryption**: Age encryption enabled for secrets
+- **Currently managed**:
+  - `.zshrc` (with cross-distro template support)
+  - `.zsharch` (Arch Linux only, via `.chezmoiignore`)
+  - SSH keys (encrypted with age)
+
+### Age Encryption
+
+This repository uses [age](https://age-encryption.org/) to encrypt sensitive files like SSH keys.
+
+**Key locations:**
+- **Private key (identity)**: `~/.config/chezmoi/key.txt` - **NEVER commit, keep secure backup**
+- **Public key (recipient)**: `age1vten8ylla4zqxs905wpz5gascm5t4gyvnuldyw4x8e80kqp8354s625stz` - safe in `.chezmoi.toml.tmpl`
+
+**Encrypted files:**
+- `private_dot_ssh/encrypted_private_id_ed25519.age` - SSH private key
+- `private_dot_ssh/id_ed25519.pub` - SSH public key (not encrypted)
+
+**Bootstrap on new machine:**
+```bash
+# Option 1: Use GitHub PAT for initial clone
+git clone https://github.com/zzxyz/chezmoi.git ~/.local/share/chezmoi
+# Copy age key from secure backup
+cp /path/to/backup/key.txt ~/.config/chezmoi/key.txt
+chezmoi apply
+
+# Option 2: Manually copy SSH key first, then clone via SSH
+```
+
+**Working without the age key:**
+```bash
+# Apply only non-encrypted files
+chezmoi apply --exclude=encrypted
+```
 
 ## Architecture Notes
 
@@ -77,3 +111,5 @@ The zshrc references a user named "tyler" in some paths and comments, suggesting
 - Always use `chezmoi apply` to deploy changes to the home directory
 - Never edit dotfiles directly in the home directory; edit them in the source directory
 - Use `chezmoi status` before committing to ensure all changes are tracked
+- **Security**: The age private key (`~/.config/chezmoi/key.txt`) must be kept secure and never committed to git
+- **Conditional files**: `.chezmoiignore` controls which files are applied based on system characteristics (OS, distro, hostname)
