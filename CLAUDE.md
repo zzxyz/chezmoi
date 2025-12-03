@@ -137,3 +137,4 @@ The zshrc references a user named "tyler" in some paths and comments, suggesting
 - **Security**: The age private key (`~/.config/chezmoi/key.txt`) must be kept secure and never committed to git
 - **Conditional files**: `.chezmoiignore` controls which files are applied based on system characteristics (OS, distro, hostname)
 - **Cross-platform templates**: When accessing `.chezmoi.osRelease`, always check existence first with `hasKey` to support Windows
+- always go full perl

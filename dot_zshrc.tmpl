@@ -20,6 +20,9 @@ fpath=(/usr/share/zsh-completions/src $fpath)
 # Ubuntu: zsh-completions typically in /usr/share/zsh/vendor-completions
 fpath=(/usr/share/zsh/vendor-completions $fpath)
 {{-   end }}
+{{- else }}
+# Windows: manually installed completions
+[ -d ~/.zsh/zsh-completions/src ] && fpath=(~/.zsh/zsh-completions/src $fpath)
 {{- end }}
 # The following lines were added by compinstall
 
@@ -74,6 +77,8 @@ PROMPT="%m:%~%(!.☺.%(?.£.%{$fg[red]%}£%{$fg[default]%})) "
 path+=("$HOME/.local/bin")
 path+=("$HOME/bin")
 path+=('/usr/lib64/garglk')
+# Ruby gems
+[ -d "$HOME/.local/share/gem/ruby" ] && path+=("$HOME/.local/share/gem/ruby"/*/bin(N))
 export PATH
 export NO_AT_BRIDGE=1
 
@@ -146,6 +151,11 @@ ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 # Ubuntu path for zsh-syntax-highlighting
 [ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ] && . /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 {{-   end }}
+ZSH_HIGHLIGHT_STYLES[path]=none
+{{- else }}
+# Windows: manually installed syntax highlighting
+ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
+[ -f ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ] && . ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 ZSH_HIGHLIGHT_STYLES[path]=none
 {{- end }}
 
