@@ -56,9 +56,11 @@ chezmoi cd                  # Change to source directory
 - **Source directory**: `~/.local/share/chezmoi`
 - **Target directory**: `~/.home/aubrey` (user's home directory)
 - **Encryption**: Age encryption enabled for secrets
+- **Cross-platform**: Works on Linux (Arch, Ubuntu) and Windows (Git Bash with zsh)
 - **Currently managed**:
-  - `.zshrc` (with cross-distro template support)
+  - `.zshrc` (with cross-platform template support)
   - `.zsharch` (Arch Linux only, via `.chezmoiignore`)
+  - `.vimrc` (with chezmoi filetype detection)
   - SSH keys (encrypted with age)
 
 ### Age Encryption
@@ -90,6 +92,27 @@ chezmoi apply
 chezmoi apply --exclude=encrypted
 ```
 
+## Cross-Platform Support
+
+This repository now supports both Linux and Windows environments:
+
+**Linux (Primary):**
+- Arch Linux and Ubuntu with distro-specific paths for zsh plugins
+- Full kitty terminal integration
+- Native zsh shell
+
+**Windows (Git Bash):**
+- Requires zsh installed via MSYS2/Git Bash
+- Templates check for `osRelease` existence before accessing Linux-specific features
+- Add `exec zsh` to `.bashrc` to auto-launch zsh in Git Bash
+- Some features unavailable: kitty integration, certain zsh plugins
+
+**Template Strategy:**
+- All templates use defensive checks: `{{- if and (hasKey .chezmoi "osRelease") (hasKey .chezmoi.osRelease "id") }}`
+- This allows the same templates to work across platforms without errors
+- Linux systems proceed with distro-specific configuration
+- Windows systems skip Linux-only sections gracefully
+
 ## Architecture Notes
 
 ### .zshrc Configuration
@@ -113,3 +136,4 @@ The zshrc references a user named "tyler" in some paths and comments, suggesting
 - Use `chezmoi status` before committing to ensure all changes are tracked
 - **Security**: The age private key (`~/.config/chezmoi/key.txt`) must be kept secure and never committed to git
 - **Conditional files**: `.chezmoiignore` controls which files are applied based on system characteristics (OS, distro, hostname)
+- **Cross-platform templates**: When accessing `.chezmoi.osRelease`, always check existence first with `hasKey` to support Windows
