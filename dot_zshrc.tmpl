@@ -28,7 +28,7 @@ zstyle :compinstall filename "$HOME/.zshrc"
 
 autoload -Uz compinit
 compinit
-kitty + complete setup zsh | source /dev/stdin
+command -v kitty &>/dev/null && kitty + complete setup zsh | source /dev/stdin
 # End of lines added by compinstall
 # create a zkbd compatible hash;
 # to add other keys to this hash, see: man 5 terminfo
@@ -78,7 +78,7 @@ export PATH
 export NO_AT_BRIDGE=1
 
 function settitle() {
-	echo -ne "\033]2;"$1"\007"
+	printf '\033]2;%s\007' "$1"
 }
 
 function chpwd() {
@@ -117,6 +117,7 @@ alias l='ls -CF'
 alias lld='ls -ldtr -- */'
 alias powershell='pwsh'
 alias icat='kitty +kitten icat'
+alias which='command -v'
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
@@ -137,16 +138,16 @@ source ~/.zsharch
 {{-   end }}
 {{- end }}
 
-ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 {{- if and (hasKey .chezmoi "osRelease") (hasKey .chezmoi.osRelease "id") }}
+ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 {{-   if eq .chezmoi.osRelease.id "arch" }}
 . /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 {{-   else if eq .chezmoi.osRelease.id "ubuntu" }}
 # Ubuntu path for zsh-syntax-highlighting
 [ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ] && . /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 {{-   end }}
-{{- end }}
 ZSH_HIGHLIGHT_STYLES[path]=none
+{{- end }}
 
 case "$TERM" in
     *kitty*) [ -f ~/beezel\ puff.jpg ] && icat ~/beezel\ puff.jpg;;
