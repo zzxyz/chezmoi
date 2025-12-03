@@ -13,11 +13,13 @@ setopt pushd_ignore_dups
 setopt extendedglob
 DIRSTACKSIZE=9
 DIRSTACKFILE=~/.zdirs
-{{- if eq .chezmoi.osRelease.id "arch" }}
+{{- if and (hasKey .chezmoi "osRelease") (hasKey .chezmoi.osRelease "id") }}
+{{-   if eq .chezmoi.osRelease.id "arch" }}
 fpath=(/usr/share/zsh-completions/src $fpath)
-{{- else if eq .chezmoi.osRelease.id "ubuntu" }}
+{{-   else if eq .chezmoi.osRelease.id "ubuntu" }}
 # Ubuntu: zsh-completions typically in /usr/share/zsh/vendor-completions
 fpath=(/usr/share/zsh/vendor-completions $fpath)
+{{-   end }}
 {{- end }}
 # The following lines were added by compinstall
 
@@ -129,16 +131,20 @@ alias findrei='find . -regextype egrep -iregex'
 # ~/.bash_aliases, instead of adding them here directly.
 # See /usr/share/doc/bash-doc/examples in the bash-doc package.
 
-{{- if eq .chezmoi.osRelease.id "arch" }}
+{{- if and (hasKey .chezmoi "osRelease") (hasKey .chezmoi.osRelease "id") }}
+{{-   if eq .chezmoi.osRelease.id "arch" }}
 source ~/.zsharch
+{{-   end }}
 {{- end }}
 
 ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
-{{- if eq .chezmoi.osRelease.id "arch" }}
+{{- if and (hasKey .chezmoi "osRelease") (hasKey .chezmoi.osRelease "id") }}
+{{-   if eq .chezmoi.osRelease.id "arch" }}
 . /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-{{- else if eq .chezmoi.osRelease.id "ubuntu" }}
+{{-   else if eq .chezmoi.osRelease.id "ubuntu" }}
 # Ubuntu path for zsh-syntax-highlighting
 [ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ] && . /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+{{-   end }}
 {{- end }}
 ZSH_HIGHLIGHT_STYLES[path]=none
 
