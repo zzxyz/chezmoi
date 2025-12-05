@@ -30,7 +30,12 @@ zstyle ':completion:*' matcher-list 'm:{[:lower:]}={[:upper:]}'
 zstyle :compinstall filename "$HOME/.zshrc"
 
 autoload -Uz compinit
-compinit
+# Speed up compinit by only checking cache once per day
+if [[ -n ${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
+	compinit
+else
+	compinit -C
+fi
 command -v kitty &>/dev/null && kitty + complete setup zsh | source /dev/stdin
 # End of lines added by compinstall
 # create a zkbd compatible hash;
@@ -91,13 +96,14 @@ function chpwd() {
 }
 
 # enable color support of ls and also add handy aliases
-if [ -x /usr/bin/dircolors ]; then
+# Skip dircolors if LS_COLORS already set (avoid duplicate evaluation from .bashrc)
+if [ -x /usr/bin/dircolors ] && [[ -z "$LS_COLORS" ]]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='ls --color=auto'
-    alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
 fi
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
 
 # colored GCC warnings and errors
 #export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
