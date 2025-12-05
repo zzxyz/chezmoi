@@ -2,6 +2,12 @@
 export LC_ALL="en_US.UTF-8"
 export EDITOR='vim'
 export VISUAL='vim'
+
+{{- if not (and (hasKey .chezmoi "osRelease") (hasKey .chezmoi.osRelease "id")) }}
+# Windows: Configure Claude Code to use MSYS64 bash when running in this environment
+export CLAUDE_CODE_GIT_BASH_PATH="C:\msys64\usr\bin\bash.exe"
+{{- end }}
+
 HISTFILE=~/.histfile
 HISTSIZE=50000
 SAVEHIST=50000

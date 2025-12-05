@@ -101,7 +101,9 @@ This repository now supports both Linux and Windows environments:
 - Full kitty terminal integration
 - Native zsh shell
 
-**Windows (Git Bash):**
+**Windows (Git Bash & MSYS64):**
+- Git Bash: Bundled MSYS2 environment from Git for Windows
+- MSYS64: Standalone MSYS2 installation (recommended for newer packages)
 - Requires zsh installed via MSYS2/Git Bash
 - Templates check for `osRelease` existence before accessing Linux-specific features
 - Add `exec zsh` to `.bashrc` to auto-launch zsh in Git Bash
@@ -112,6 +114,38 @@ This repository now supports both Linux and Windows environments:
 - This allows the same templates to work across platforms without errors
 - Linux systems proceed with distro-specific configuration
 - Windows systems skip Linux-only sections gracefully
+
+### IMPORTANT: Cross-Platform Template Development
+
+**When modifying any `.tmpl` file, ALWAYS consider all supported platforms:**
+
+**Supported Platforms:**
+- Linux: Arch Linux, Ubuntu
+- Windows: Git Bash, MSYS64
+
+**Critical Rules:**
+1. **Never assume Linux**: Windows doesn't have `osRelease`, so always check before accessing it
+2. **Use defensive checks**: `{{- if and (hasKey .chezmoi "osRelease") (hasKey .chezmoi.osRelease "id") }}`
+3. **Platform-specific paths/features**: Wrap in conditionals (Linux-only plugins, Windows-only paths)
+4. **Test mentally**: Before committing, think through how the template renders on each platform
+5. **Common pitfall**: Adding Linux-specific exports or commands without Windows checks
+
+**Example Pattern:**
+```go
+{{- if and (hasKey .chezmoi "osRelease") (hasKey .chezmoi.osRelease "id") }}
+# Linux-specific configuration
+{{-   if eq .chezmoi.osRelease.id "arch" }}
+# Arch-specific
+{{-   else if eq .chezmoi.osRelease.id "ubuntu" }}
+# Ubuntu-specific
+{{-   end }}
+{{- else }}
+# Windows-specific configuration
+{{- end }}
+```
+
+**Recent Example:**
+Initially added `export CLAUDE_CODE_GIT_BASH_PATH="C:\msys64\usr\bin\bash.exe"` without a platform check, which would have failed on Linux. Fixed by wrapping in Windows-only conditional.
 
 ## Architecture Notes
 
@@ -137,4 +171,5 @@ The zshrc references a user named "tyler" in some paths and comments, suggesting
 - **Security**: The age private key (`~/.config/chezmoi/key.txt`) must be kept secure and never committed to git
 - **Conditional files**: `.chezmoiignore` controls which files are applied based on system characteristics (OS, distro, hostname)
 - **Cross-platform templates**: When accessing `.chezmoi.osRelease`, always check existence first with `hasKey` to support Windows
+- **Platform-aware templates**: ALWAYS wrap platform-specific code in conditionals - see "IMPORTANT: Cross-Platform Template Development" section above
 - always go full perl
