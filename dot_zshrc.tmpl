@@ -159,10 +159,13 @@ ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 {{-   end }}
 ZSH_HIGHLIGHT_STYLES[path]=none
 {{- else }}
-# Windows: manually installed syntax highlighting
-ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
+# Windows: manually installed syntax highlighting with performance tuning for ucrt64
+ZSH_HIGHLIGHT_HIGHLIGHTERS=(main)  # Removed 'brackets' for better performance
+ZSH_HIGHLIGHT_MAXLENGTH=512  # Skip highlighting very long commands
+typeset -g ZSH_HIGHLIGHT_STYLES  # Initialize styles array
 [ -f ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ] && . ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 ZSH_HIGHLIGHT_STYLES[path]=none
+ZSH_HIGHLIGHT_STYLES[path_prefix]=none  # Disable partial path highlighting (reduces redraws)
 {{- end }}
 
 case "$TERM" in
