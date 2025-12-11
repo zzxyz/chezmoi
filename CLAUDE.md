@@ -173,3 +173,4 @@ The zshrc references a user named "tyler" in some paths and comments, suggesting
 - **Cross-platform templates**: When accessing `.chezmoi.osRelease`, always check existence first with `hasKey` to support Windows
 - **Platform-aware templates**: ALWAYS wrap platform-specific code in conditionals - see "IMPORTANT: Cross-Platform Template Development" section above
 - always go full perl
+- Always exclude ~/Dropbox from searches (find etc) on Windows systems

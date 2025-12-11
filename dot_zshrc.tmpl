@@ -6,6 +6,8 @@ export VISUAL='vim'
 {{- if not (and (hasKey .chezmoi "osRelease") (hasKey .chezmoi.osRelease "id")) }}
 # Windows: Configure Claude Code to use MSYS64 bash when running in this environment
 export CLAUDE_CODE_GIT_BASH_PATH="C:\msys64\usr\bin\bash.exe"
+# Windows: Use Unix-style config directory for cross-platform compatibility
+export XDG_CONFIG_HOME="$HOME/.config"
 {{- end }}
 
 HISTFILE=~/.histfile
