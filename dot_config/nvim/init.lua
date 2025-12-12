@@ -35,6 +35,48 @@ vim.opt.hidden = true              -- Allow hidden buffers
 vim.opt.formatoptions:remove('cro') -- Disable auto-commenting
 vim.opt.termguicolors = true       -- 24-bit color support
 vim.opt.background = 'dark'
+-- Clipboard configuration: Explicitly configure to avoid slow auto-detection (739ms!)
+-- Priority: win32yank (WSL) > wl-clipboard (Wayland) > xclip (X11)
+if vim.fn.executable('win32yank.exe') == 1 then
+  vim.g.clipboard = {
+    name = 'win32yank',
+    copy = {
+      ['+'] = 'win32yank.exe -i --crlf',
+      ['*'] = 'win32yank.exe -i --crlf',
+    },
+    paste = {
+      ['+'] = 'win32yank.exe -o --lf',
+      ['*'] = 'win32yank.exe -o --lf',
+    },
+    cache_enabled = 0,
+  }
+elseif vim.fn.executable('wl-copy') == 1 and vim.fn.executable('wl-paste') == 1 then
+  vim.g.clipboard = {
+    name = 'wl-clipboard',
+    copy = {
+      ['+'] = 'wl-copy',
+      ['*'] = 'wl-copy --primary',
+    },
+    paste = {
+      ['+'] = 'wl-paste --no-newline',
+      ['*'] = 'wl-paste --no-newline --primary',
+    },
+    cache_enabled = 1,
+  }
+elseif vim.fn.executable('xclip') == 1 then
+  vim.g.clipboard = {
+    name = 'xclip',
+    copy = {
+      ['+'] = 'xclip -selection clipboard',
+      ['*'] = 'xclip -selection primary',
+    },
+    paste = {
+      ['+'] = 'xclip -selection clipboard -o',
+      ['*'] = 'xclip -selection primary -o',
+    },
+    cache_enabled = 1,
+  }
+end
 vim.opt.clipboard = 'unnamedplus'  -- Use system clipboard
 vim.opt.mouse = 'a'                -- Enable mouse support
 
