@@ -169,20 +169,26 @@ require('lazy').setup({
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     config = function()
-      -- Detect if we're on Windows (UCRT64 has system parsers)
-      local is_windows = vim.fn.has('win32') == 1 or vim.fn.has('win64') == 1
+      -- Modern nvim-treesitter setup (post-rewrite API)
+      -- The old require('nvim-treesitter.configs') API NO LONGER EXISTS
 
-      require('nvim-treesitter.configs').setup({
-        -- Windows: Use system-provided parsers from UCRT64 to avoid conflicts
-        -- Linux: Auto-install parsers (requires gcc)
-        auto_install = not is_windows,
-        highlight = {
-          enable = true,
-          additional_vim_regex_highlighting = false,
-        },
-        indent = {
-          enable = true,
-        },
+      -- Arch Linux NOTE: Use system-provided parsers via pacman!
+      -- Install with: sudo pacman -S tree-sitter-{lua,python,bash,etc}
+      -- System parsers are in /usr/lib/tree_sitter/ (automatically detected by nvim)
+      -- DO NOT use :TSInstall - it will conflict with system packages!
+
+      -- Basic setup (optional, uses defaults if omitted)
+      require('nvim-treesitter').setup({
+        -- Don't auto-install parsers - we use system packages on Arch
+        -- (Other distros may need manual installation)
+      })
+
+      -- Enable treesitter highlighting automatically for all filetypes
+      vim.api.nvim_create_autocmd('FileType', {
+        callback = function()
+          -- pcall in case parser not installed for this filetype
+          pcall(vim.treesitter.start)
+        end,
       })
     end,
   },

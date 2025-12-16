@@ -92,6 +92,12 @@ path+=("$HOME/bin")
 path+=('/usr/lib64/garglk')
 # Ruby gems
 [ -d "$HOME/.local/share/gem/ruby" ] && path+=("$HOME/.local/share/gem/ruby"/*/bin(N))
+# NVM initialization (Arch Linux system package)
+{{- if and (hasKey .chezmoi "osRelease") (hasKey .chezmoi.osRelease "id") }}
+{{-   if eq .chezmoi.osRelease.id "arch" }}
+[ -f /usr/share/nvm/init-nvm.sh ] && source /usr/share/nvm/init-nvm.sh
+{{-   end }}
+{{- end }}
 export PATH
 export NO_AT_BRIDGE=1
 
