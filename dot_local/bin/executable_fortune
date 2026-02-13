@@ -9,17 +9,19 @@ Getopt::Long::Configure('no_ignore_case');
 my $short = 0;
 my $long  = 0;
 my $help  = 0;
+my $ignored = 0;
 
 GetOptions(
     'short|s' => \$short,
     'long|l'  => \$long,
     'help|h'  => \$help,
+    'a|o'     => \$ignored,
 ) or usage();
 
 usage() if $help;
 
 sub usage {
-    print STDERR <<'EOF';
+    print <<'EOF';
 PERL FORTUNE!
 Usage: fortune [OPTIONS] [FILE]
 
