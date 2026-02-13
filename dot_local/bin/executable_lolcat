@@ -1,0 +1,132 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use POSIX qw(floor);
+use Getopt::Long;
+
+my $spread = 3.0;
+my $freq   = 0.1;
+my $seed   = int(rand(256));
+my $force  = 0;
+my $animate = 0;
+my $speed  = 20;
+my $help   = 0;
+
+Getopt::Long::Configure('no_ignore_case');
+GetOptions(
+    'spread|p=f'  => \$spread,
+    'freq|F=f'    => \$freq,
+    'seed|S=i'    => \$seed,
+    'force|f'     => \$force,
+    'animate|a'   => \$animate,
+    'speed|s=f'   => \$speed,
+    'help|h'      => \$help,
+) or usage();
+
+usage() if $help;
+
+# Force color if --force or if stdout is a terminal
+my $color = $force || -t STDOUT;
+
+sub usage {
+    print STDERR <<'EOF';
+PERL LOLCAT lol!
+Usage: lolcat [OPTIONS] [FILE...]
+
+Options:
+  -p, --spread <f>   Rainbow spread (default: 3.0)
+  -F, --freq <f>     Rainbow frequency (default: 0.1)
+  -S, --seed <i>     Rainbow seed (default: random)
+  -f, --force        Force color even when stdout is not a terminal
+  -a, --animate      Animate the rainbow
+  -s, --speed <f>    Animation speed (default: 20)
+  -h, --help         Show this help
+EOF
+    exit 1;
+}
+
+sub rainbow {
+    my ($freq, $i) = @_;
+    my $r = floor(sin($freq * $i + 0)         * 127 + 128);
+    my $g = floor(sin($freq * $i + 2*3.14159/3) * 127 + 128);
+    my $b = floor(sin($freq * $i + 4*3.14159/3) * 127 + 128);
+    return ($r, $g, $b);
+}
+
+sub colorize {
+    my ($text, $line_offset) = @_;
+    my $out = '';
+    my $col = 0;
+    my $in_escape = 0;
+
+    for my $char (split //, $text) {
+        # Pass through existing ANSI escape sequences
+        if ($in_escape) {
+            $out .= $char;
+            $in_escape = 0 if $char =~ /[a-zA-Z]/;
+            next;
+        }
+        if ($char eq "\e") {
+            $in_escape = 1;
+            $out .= $char;
+            next;
+        }
+
+        if ($color && $char ne "\n" && $char ne "\r") {
+            my ($r, $g, $b) = rainbow($freq, $seed + $line_offset + $col / $spread);
+            $out .= sprintf("\e[38;2;%d;%d;%dm%s", $r, $g, $b, $char);
+        } else {
+            $out .= $char;
+        }
+        $col++;
+    }
+    $out .= "\e[0m" if $color;
+    return $out;
+}
+
+my $line_num = 0;
+
+if ($animate) {
+    # Slurp all input first
+    my @lines;
+    if (@ARGV) {
+        for my $file (@ARGV) {
+            open my $fh, '<', $file or die "Can't open $file: $!\n";
+            push @lines, <$fh>;
+            close $fh;
+        }
+    } else {
+        @lines = <STDIN>;
+    }
+    chomp @lines;
+
+    $| = 1;  # autoflush
+    my $offset = 0;
+    print "\e[?25l";  # hide cursor
+    eval {
+        local $SIG{INT} = sub { print "\e[?25h\e[0m\n"; exit 0; };
+        while (1) {
+            print "\e[H";  # cursor home
+            for my $i (0 .. $#lines) {
+                print colorize($lines[$i], $i + $offset) . "\e[K\n";
+            }
+            $offset++;
+            select(undef, undef, undef, 1.0 / $speed);
+        }
+    };
+    print "\e[?25h";  # show cursor
+} else {
+    if (@ARGV) {
+        for my $file (@ARGV) {
+            open my $fh, '<', $file or die "Can't open $file: $!\n";
+            while (my $line = <$fh>) {
+                print colorize($line, $line_num++);
+            }
+            close $fh;
+        }
+    } else {
+        while (my $line = <STDIN>) {
+            print colorize($line, $line_num++);
+        }
+    }
+}

@@ -1,0 +1,76 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use IO::Uncompress::Gunzip qw(gunzip $GunzipError);
+use Getopt::Long;
+
+Getopt::Long::Configure('no_ignore_case');
+
+my $short = 0;
+my $long  = 0;
+my $help  = 0;
+
+GetOptions(
+    'short|s' => \$short,
+    'long|l'  => \$long,
+    'help|h'  => \$help,
+) or usage();
+
+usage() if $help;
+
+sub usage {
+    print STDERR <<'EOF';
+PERL FORTUNE!
+Usage: fortune [OPTIONS] [FILE]
+
+Options:
+  -s, --short   Short fortunes only (< 4 lines)
+  -l, --long    Long fortunes only (>= 4 lines)
+  -h, --help    Show this help
+
+If FILE is given, reads from that file (plain text or .gz).
+Otherwise looks for ~/.local/share/fortunes.gz, then /usr/share/fortune/fortunes.
+EOF
+    exit 1;
+}
+
+sub find_fortune_file {
+    my @candidates = (
+        "$ENV{HOME}/.local/share/fortunes.gz",
+        "/usr/share/fortune/fortunes",
+    );
+    for my $f (@candidates) {
+        return $f if -f $f;
+    }
+    die "No fortune file found!\n";
+}
+
+my $file = shift @ARGV || find_fortune_file();
+
+my $text;
+if ($file =~ /\.gz$/) {
+    gunzip($file => \$text) or die "gunzip failed: $GunzipError\n";
+} else {
+    open my $fh, '<', $file or die "Can't open $file: $!\n";
+    local $/;
+    $text = <$fh>;
+    close $fh;
+}
+
+# Split on the % delimiter
+my @fortunes = grep { /\S/ } split /^%$/m, $text;
+
+# Filter by length if requested
+if ($short) {
+    @fortunes = grep { scalar(split /\n/, $_) < 4 } @fortunes;
+} elsif ($long) {
+    @fortunes = grep { scalar(split /\n/, $_) >= 4 } @fortunes;
+}
+
+die "No fortunes matched the filter!\n" unless @fortunes;
+
+# Pick one at random and trim
+my $chosen = $fortunes[rand @fortunes];
+$chosen =~ s/^\n+//;
+$chosen =~ s/\n+$//;
+print "$chosen\n";
