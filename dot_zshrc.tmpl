@@ -4,8 +4,10 @@ export EDITOR='nvim'
 export VISUAL='nvim'
 
 {{- if not (and (hasKey .chezmoi "osRelease") (hasKey .chezmoi.osRelease "id")) }}
-# Windows: Configure Claude Code to use MSYS64 bash when running in this environment
-export CLAUDE_CODE_GIT_BASH_PATH="C:\msys64\usr\bin\bash.exe"
+# Windows: Point Claude Code at whichever MSYS2 bash we're running in
+if [ -n "$MSYSTEM" ]; then
+  export CLAUDE_CODE_GIT_BASH_PATH="$(cygpath -w /usr/bin/bash.exe)"
+fi
 # Windows: Use Unix-style config directory for cross-platform compatibility
 export XDG_CONFIG_HOME="$HOME/.config"
 {{- end }}
