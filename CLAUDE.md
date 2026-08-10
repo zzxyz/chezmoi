@@ -145,7 +145,7 @@ This repository now supports both Linux and Windows environments:
 ```
 
 **Recent Example:**
-Initially added `export CLAUDE_CODE_GIT_BASH_PATH="C:\msys64\usr\bin\bash.exe"` without a platform check, which would have failed on Linux. Fixed by wrapping in Windows-only conditional.
+`CLAUDE_CODE_GIT_BASH_PATH` was initially exported as a hardcoded `C:\msys64\usr\bin\bash.exe`, which both failed on Linux and pinned Windows to one MSYS2 install. Now `dot_zshrc.tmpl` uses `$(cygpath -w /usr/bin/bash.exe)` inside a Windows-only conditional, so it resolves to whichever MSYS2 environment is hosting the shell (Git Bash or MSYS64).
 
 ## Architecture Notes
 
@@ -170,6 +170,7 @@ The zshrc references a user named "tyler" in some paths and comments, suggesting
 - Use `chezmoi status` before committing to ensure all changes are tracked
 - **Security**: The age private key (`~/.config/chezmoi/key.txt`) must be kept secure and never committed to git
 - **Conditional files**: `.chezmoiignore` controls which files are applied based on system characteristics (OS, distro, hostname)
+- **Repo docs are not dotfiles**: chezmoi applies every source file unless `.chezmoiignore` excludes it, so repo-only docs (`CLAUDE.md`, `powershell-planning.md`) must be listed there or they land in `~` — where `~/CLAUDE.md` would leak chezmoi guidance into every unrelated session. Ignoring keeps them in git but out of the home directory.
 - **Cross-platform templates**: When accessing `.chezmoi.osRelease`, always check existence first with `hasKey` to support Windows
 - **Platform-aware templates**: ALWAYS wrap platform-specific code in conditionals - see "IMPORTANT: Cross-Platform Template Development" section above
 - always go full perl

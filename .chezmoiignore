@@ -1,4 +1,7 @@
-{{- /* Ignore .zsharch on non-Arch systems */ -}}
+{{/* Repo documentation, not dotfiles: tracked in git but never applied to home */}}
+CLAUDE.md
+powershell-planning.md
+{{/* Ignore .zsharch on non-Arch systems */}}
 {{- if and (hasKey .chezmoi "osRelease") (hasKey .chezmoi.osRelease "id") }}
 {{-   if ne .chezmoi.osRelease.id "arch" }}
 .zsharch
